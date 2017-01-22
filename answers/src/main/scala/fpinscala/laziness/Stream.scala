@@ -161,7 +161,8 @@ trait Stream[+A] {
     }
 
   /*
-  The last element of `tails` is always the empty `Stream`, so we handle this as a special case, by appending it to the output.
+  The last element of `tails` is always the empty `Stream`,
+  so we handle this as a special case, by appending it to the output.
   */
   def tails: Stream[Stream[A]] =
     unfold(this) {
@@ -173,13 +174,18 @@ trait Stream[+A] {
     tails exists (_ startsWith s)
 
   /*
-  The function can't be implemented using `unfold`, since `unfold` generates elements of the `Stream` from left to right. It can be implemented using `foldRight` though.
+  The function can't be implemented using `unfold`, since `unfold` generates elements of the `Stream` from left to right.
+  It can be implemented using `foldRight` though.
 
-  The implementation is just a `foldRight` that keeps the accumulated value and the stream of intermediate results, which we `cons` onto during each iteration. When writing folds, it's common to have more state in the fold than is needed to compute the result. Here, we simply extract the accumulated list once finished.
+  The implementation is just a `foldRight` that keeps the accumulated value and the stream of intermediate results,
+  which we `cons` onto during each iteration.
+  When writing folds, it's common to have more state in the fold than is needed to compute the result.
+  Here, we simply extract the accumulated list once finished.
   */
   def scanRight[B](z: B)(f: (A, => B) => B): Stream[B] =
     foldRight((z, Stream(z)))((a, p0) => {
-      // p0 is passed by-name and used in by-name args in f and cons. So use lazy val to ensure only one evaluation...
+      // p0 is passed by-name and used in by-name args in f and cons.
+      // So use lazy val to ensure only one evaluation...
       lazy val p1 = p0
       val b2 = f(a, p1._1)
       (b2, cons(b2, p1._2))
@@ -241,7 +247,9 @@ object Stream {
     f(z).map((p: (A,S)) => cons(p._1,unfold(p._2)(f))).getOrElse(empty[A])
 
   /*
-  Scala provides shorter syntax when the first action of a function literal is to match on an expression.  The function passed to `unfold` in `fibsViaUnfold` is equivalent to `p => p match { case (f0,f1) => ... }`, but we avoid having to choose a name for `p`, only to pattern match on it.
+  Scala provides shorter syntax when the first action of a function literal is to match on an expression.
+  The function passed to `unfold` in `fibsViaUnfold` is equivalent to `p => p match { case (f0,f1) => ... }`,
+  but we avoid having to choose a name for `p`, only to pattern match on it.
   */
   val fibsViaUnfold =
     unfold((0,1)) { case (f0,f1) => Some((f0,(f1,f0+f1))) }
